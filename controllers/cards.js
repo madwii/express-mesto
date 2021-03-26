@@ -18,7 +18,6 @@ const createCard = (req, res) => {
       } else {
         res.status(500).send({ message: `Внутренняя ошибка сервера ${err}` });
       }
-      return null;
     });
 };
 
@@ -27,16 +26,14 @@ const deleteCard = (req, res) => {
     if (!card) {
       return res.status(404).send({ message: 'Не найдена карточка по id' });
     }
-    res.send(card);
-    return null;
+    return res.send(card);
   })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Ошибка данных. id не существует' });
+        res.status(400).send({ message: 'Ошибка данных' });
       } else {
         res.status(500).send({ message: `Внутренняя ошибка сервера ${err}` });
       }
-      return null;
     });
 };
 
@@ -49,12 +46,11 @@ const likeCard = (req, res) => Card.findByIdAndUpdate(
     if (!card) {
       return res.status(404).send({ message: 'Не найдена карточка по id' });
     }
-    res.send(card);
-    return null;
+    return res.send(card);
   })
   .catch((err) => {
     if (err.name === 'CastError') {
-      res.status(400).send({ message: 'Ошибка данных. id не существует' });
+      res.status(400).send({ message: 'Ошибка данных' });
     } else {
       res.status(500).send({ message: `Внутренняя ошибка сервера ${err}` });
     }
@@ -69,12 +65,11 @@ const dislikeCard = (req, res) => Card.findByIdAndUpdate(
     if (!card) {
       return res.status(404).send({ message: 'Не найдена карточка по id' });
     }
-    res.send(card);
-    return null;
+    return res.send(card);
   })
   .catch((err) => {
     if (err.name === 'CastError') {
-      res.status(400).send({ message: 'Ошибка данных. id не существует' });
+      res.status(400).send({ message: 'Ошибка данных' });
     } else {
       res.status(500).send({ message: `Внутренняя ошибка сервера ${err}` });
     }

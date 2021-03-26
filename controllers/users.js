@@ -15,12 +15,11 @@ const getUserById = (req, res) => {
       if (!user) {
         return res.status(404).send({ message: 'Пользователь не найден' });
       }
-      res.send(user);
-      return null;
+      return res.send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Ошибка данных. id не существует' });
+        res.status(400).send({ message: 'Ошибка данных' });
       } else {
         res.status(500).send({ message: `Внутренняя ошибка сервера ${err}` });
       }
@@ -53,8 +52,7 @@ const updateUser = (req, res) => {
       if (!user) {
         return res.status(404).send({ message: 'Пользователь не найден' });
       }
-      res.send(user);
-      return null;
+      return res.send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
@@ -73,8 +71,7 @@ const updateAvatar = (req, res) => {
       if (!user) {
         return res.status(404).send({ message: 'Пользователь не найден' });
       }
-      res.send(user);
-      return null;
+      return res.send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
