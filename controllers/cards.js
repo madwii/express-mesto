@@ -1,79 +1,93 @@
+/* eslint-disable no-shadow */
 const Card = require('../models/card');
+const NotFoundError = require('../errors/not-found-err');
+const BadRequestError = require('../errors/bad-request-err');
+const ForbiddenError = require('../errors/forbidden-err');
 
-const getCards = (req, res) => {
+const getCards = (req, res, next) => {
   Card.find({})
-    .then((cards) => res.status(200).send(cards))
-    .catch((err) => res.status(500).send({ message: `Внутренняя ошибка сервера ${err}` }));
+    .then((cards) => res.send(cards))
+    .catch(next);
 };
 
-const createCard = (req, res) => {
+const createCard = (req, res, next) => {
   const { name, link } = req.body;
   const owner = req.user._id;
 
   Card.create({ name, link, owner })
-    .then((card) => res.status(200).send(card))
+    .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Ошибка валидации' });
+        next(new BadRequestError('Переданы некорректные данные'));
       } else {
-        res.status(500).send({ message: `Внутренняя ошибка сервера ${err}` });
+        next(err);
       }
     });
 };
 
-const deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId).then((card) => {
+const deleteCard = (req, res, next) => {
+  Card.findById(req.params.id)
+    .then((card) => {
+      if (!card) {
+        throw NotFoundError('Не найдена карточка по заданному id');
+      } else if (!card.owner.equals(req.user._id)) {
+        throw new ForbiddenError('Вы не можете удалять чужие карточки');
+      } else {
+        Card.findByIdAndRemove(req.params.id)
+          .then((card) => {
+            res.send(card);
+          });
+      }
+    })
+    .catch((err) => {
+      if (err.kind === 'ObjectId') {
+        next(new BadRequestError('Ошибка валидации данных'));
+      } else {
+        next(err);
+      }
+    });
+};
+
+const likeCard = (req, res, next) => {
+  Card.findByIdAndUpdate(req.params.id,
+    { $addToSet: { likes: req.user._id } },
+    { new: true })
+    .then((card) => {
+      if (!card) {
+        next(new NotFoundError('Не найдена карточка по заданному id'));
+      } else {
+        res.send(card);
+      }
+    })
+    .catch((err) => {
+      if (err.kind === 'ObjectId') {
+        next(new BadRequestError('Ошибка валидации данных'));
+      } else {
+        next(err);
+      }
+    });
+};
+
+const dislikeCard = (req, res, next) => {
+  Card.findByIdAndUpdate(
+    req.params.id,
+    { $pull: { likes: req.user._id } },
+    { new: true },
+  ).then((card) => {
     if (!card) {
-      return res.status(404).send({ message: 'Не найдена карточка по id' });
+      next(new NotFoundError('Не найдена карточка по заданному id'));
+    } else {
+      res.send(card);
     }
-    return res.send(card);
   })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Ошибка данных' });
+      if (err.kind === 'ObjectId') {
+        next(new BadRequestError('Ошибка валидации данных'));
       } else {
-        res.status(500).send({ message: `Внутренняя ошибка сервера ${err}` });
+        next(err);
       }
     });
 };
-
-const likeCard = (req, res) => Card.findByIdAndUpdate(
-  req.params.cardId,
-  { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
-  { new: true },
-)
-  .then((card) => {
-    if (!card) {
-      return res.status(404).send({ message: 'Не найдена карточка по id' });
-    }
-    return res.send(card);
-  })
-  .catch((err) => {
-    if (err.name === 'CastError') {
-      res.status(400).send({ message: 'Ошибка данных' });
-    } else {
-      res.status(500).send({ message: `Внутренняя ошибка сервера ${err}` });
-    }
-  });
-
-const dislikeCard = (req, res) => Card.findByIdAndUpdate(
-  req.params.cardId,
-  { $pull: { likes: req.user._id } }, // убрать _id из массива
-  { new: true },
-)
-  .then((card) => {
-    if (!card) {
-      return res.status(404).send({ message: 'Не найдена карточка по id' });
-    }
-    return res.send(card);
-  })
-  .catch((err) => {
-    if (err.name === 'CastError') {
-      res.status(400).send({ message: 'Ошибка данных' });
-    } else {
-      res.status(500).send({ message: `Внутренняя ошибка сервера ${err}` });
-    }
-  });
 
 module.exports = {
   getCards,
