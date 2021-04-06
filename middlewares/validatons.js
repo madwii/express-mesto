@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 const { celebrate, Joi } = require('celebrate');
 const { ObjectId } = require('mongoose').Types;
 const validator = require('validator');
