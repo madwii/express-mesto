@@ -1,9 +1,11 @@
+/* eslint-disable no-unused-vars */
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const NotFoundError = require('../errors/not-found-err');
 const BadRequestError = require('../errors/bad-request-err');
 const NotUniqueEmailError = require('../errors/not-unique-email-err');
+const UnAuthError = require('../errors/un-auth-err');
 
 // поиск всех пользователей
 const getUsers = (req, res, next) => {
@@ -133,6 +135,9 @@ const login = (req, res, next) => {
         { expiresIn: '7d' },
       );
       res.status(200).send({ token });
+    })
+    .catch((err) => {
+      throw new UnAuthError('Ошибка авторизации');
     })
     .catch(next);
 };
