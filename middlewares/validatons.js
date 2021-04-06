@@ -1,5 +1,6 @@
 const { celebrate, Joi } = require('celebrate');
 const { ObjectId } = require('mongoose').Types;
+const validator = require('validator');
 
 // с помощью custom валидации проверяется ObjectId:
 // id: Joi.string().required().custom((value, helpers) => {
@@ -9,13 +10,13 @@ const { ObjectId } = require('mongoose').Types;
 //       return helpers.message('Невалидный id');
 //     }),
 
-const regExpURL = /^((ftp|http|https):\/\/)?(www\.)?([A-Za-zА-Яа-я0-9]{1}[A-Za-zА-Яа-я0-9-]*\.?)*\.{1}[A-Za-zА-Яа-я0-9-]{2,8}(\/([\w#!:.?+=&%@!\-/])*)?/;
-const regExpEmail = /^([a-z0-9_-]+\.)*[a-z0-9_-]+@[a-z0-9_-]+(\.[a-z0-9_-]+)*\.[a-z]{2,6}$/;
+// const regExpURL = /^((ftp|http|https):\/\/)?(www\.)?([A-Za-zА-Яа-я0-9]{1}[A-Za-zА-Яа-я0-9-]*\.?)*\.{1}[A-Za-zА-Яа-я0-9-]{2,8}(\/([\w#!:.?+=&%@!\-/])*)?/;
+// const regExpEmail = /^([a-z0-9_-]+\.)*[a-z0-9_-]+@[a-z0-9_-]+(\.[a-z0-9_-]+)*\.[a-z]{2,6}$/;
 
 const validateCreateUser = celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().custom((value, helpers) => {
-      if (regExpEmail.test(value)) {
+      if (validator.isEmail(value)) {
         return value;
       }
       return helpers.message('Невалидный email');
@@ -24,7 +25,7 @@ const validateCreateUser = celebrate({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
     avatar: Joi.string().custom((value, helpers) => {
-      if (regExpURL.test(value)) {
+      if (validator.isURL(value)) {
         return value;
       }
       return helpers.message('Невалидная ссылка');
@@ -38,12 +39,12 @@ const validateCreateUser = celebrate({
 const validateLogin = celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().custom((value, helpers) => {
-      if (regExpEmail.test(value)) {
+      if (validator.isEmail(value)) {
         return value;
       }
       return helpers.message('Невалидный email');
     }),
-    password: Joi.string().required().min(8).max(30),
+    password: Joi.string().required().min(8),
   }),
   headers: Joi.object().keys({
     'content-type': Joi.string().valid('application/json').required(),
@@ -73,7 +74,7 @@ const validateUserById = celebrate({
 const validateUpdateAvatar = celebrate({
   body: Joi.object().keys({
     avatar: Joi.string().required().custom((value, helpers) => {
-      if (regExpURL.test(value)) {
+      if (validator.isURL(value)) {
         return value;
       }
       return helpers.message('Невалидная ссылка');
@@ -101,7 +102,7 @@ const validateCreateCard = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30).required(),
     link: Joi.string().required().custom((value, helpers) => {
-      if (regExpURL.test(value)) {
+      if (validator.isURL(value)) {
         return value;
       }
       return helpers.message('Невалидная ссылка');
