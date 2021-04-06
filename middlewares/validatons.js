@@ -22,7 +22,7 @@ const validateCreateUser = celebrate({
       }
       return helpers.message('Невалидный email');
     }),
-    password: Joi.string().required().min(8).max(30),
+    password: Joi.string().required().min(8),
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
     avatar: Joi.string().custom((value, helpers) => {
