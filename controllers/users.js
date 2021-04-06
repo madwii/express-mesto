@@ -30,7 +30,7 @@ const createUser = (req, res, next) => {
       res.status(201).send({ data: user.toJSON() });
     })
     .catch((err) => {
-      if (err.code === 11000) {
+      if (err.name === 'MongoError' && err.code === 11000) {
         next(new NotUniqueEmailError('Пользователь с таким электронным адресом уже существует'));
       } else if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные'));

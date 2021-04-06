@@ -1,12 +1,15 @@
 const router = require('express').Router();
+
 const { createUser, login } = require('../controllers/users');
+const { validateCreateUser, validateLogin } = require('../middlewares/validatons');
+
 const userRouter = require('./users');
 const cardRouter = require('./cards');
 const auth = require('../middlewares/auth');
 
-router.post('/signup', createUser);
+router.post('/signup', validateCreateUser, createUser);
 
-router.post('/signin', login);
+router.post('/signin', validateLogin, login);
 
 router.use(auth);
 
