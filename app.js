@@ -1,6 +1,6 @@
 const express = require('express');
 
-const { PORT = 3000 } = process.env;
+const { PORT = 3000 } = process.env;// слушаем фронт на 3000 порте
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -25,6 +25,12 @@ app.use(cors()); // разрешаем кросс-доменные запрос�
 app.use(bodyParser.json());
 
 app.use(requestLogger); // подключаем логгер запросов
+
+app.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Сервер сейчас упадёт');
+  }, 0);
+});
 
 app.use(router); // любой запрос предавай на корневой роутер
 
